@@ -1,7 +1,29 @@
 /*
  * Create a list that holds all of your cards
  */
+$(document).ready(function() {
+    function getDeck(){
+      var cardTypes = ["diamond","paper-plane-o","anchor","bolt", "cube","anchor", "leaf", "bicycle","diamond","bomb","leaf","bomb","bolt","bicycle", "paper-plane-o","cube"];
+      shuffledCards = shuffle(cardTypes);
+      $('.card').each(function(index){
+        $(this).children().attr("class", "fa fa-" + shuffledCards[index]);
+      });
+      deck = $('.deck').children('*');
+      reset(deck);
+    };
+  
+    getDeck();
+  });
 
+function reset(array){
+  //var i;
+  for (var i = 0; i < array.length; i++){
+    if (array[i].className === "card match" || array[i].className === "card open show"){
+      array[i].className = "card";
+    }
+  }
+  return array;
+}
 
 /*
  * Display the cards on the page
