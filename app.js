@@ -30,12 +30,19 @@ $(document).ready(function() {
         getDeck();
       });
     };
-    //remove all open classes and reset openCards
+     //updates move counter on screen
+     function moveCounter(){
+      $('span.moves').text(moves);
+      moves ++;
+    };
+    //remove all extra classes from cards, reset openCards, reset moveCounter
     function resetDeck(){
       $('.card').each(function(){
         $(this).removeClass('show open');
         $(this).removeClass('match');
         openCards = [];
+        moves = 0;
+        moveCounter();
 
       });
     };
@@ -80,25 +87,29 @@ $(document).ready(function() {
       }
     };
 
-      //takes no params - fin
+      //called when no match is found
+      //removes 'show open' class from open card after 300 milliseconds
+      //removes last card from openCards
       function resetCards(){
-        lastGuess = $('.deck').find('.show');
+        var lastGuess = $('.deck').find('.show');
         setTimeout(function(){
           lastGuess.removeClass('show open');
         },300);
         openCards.pop();
       };
-
+   
+      //locate open cards - removes extra classes
+      //switches 'match' class for card and lastGuess
+      //adds last card's symbol to openCards
       function keepOpen(card){
-        userGuess = getSymbol;
-        card.removeClass('show open');
-        card.addClass('match');
-        lastGuess = $('.deck').find('.show');
-        lastGuess.removeClass('show open');
-        lastGuess.addClass('match');
+        var userGuess = getSymbol(card);
+        card.switchClass('show open', 'match');
+        var lastGuess = $('.deck').find('.show');
+        lastGuess.switchClass('show open', 'match');
         openCards.push(userGuess);
       };
-      //compares last clicked card with present clicked
+   
+      //compares previous  card with present 
       //if same return true else fase
       function isMatch(userGuess){
         //get last element from openCards
@@ -106,7 +117,7 @@ $(document).ready(function() {
         return (lastGuess === userGuess) ? true : false;
       };
 
-
+      //returns the class of the reverse side of card 
       function getSymbol(card){
         symbol = card.children().attr('class');
         return symbol;
@@ -141,11 +152,5 @@ function isEven(num){
 
 /*
  * set up the event listener for a card. If a card is clicked:
- *  - display the card's symbol (put this functionality in another function that you call from this one)
- *  - add the card to a *list* of "open" cards (put this functionality in another function that you call from this one)
- *  - if the list already has another card, check to see if the two cards match
- *    + if the cards do match, lock the cards in the open position (put this functionality in another function that you call from this one)
- *    + if the cards do not match, remove the cards from the list and hide the card's symbol (put this functionality in another function that you call from this one)
- *    + increment the move counter and display it on the page (put this functionality in another function that you call from this one)
  *    + if all cards have matched, display a message with the final score (put this functionality in another function that you call from this one)
  */
