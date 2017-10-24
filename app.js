@@ -9,6 +9,7 @@
  *   - loop through each card and create its HTML
  *   - add each card's HTML to the page
  */
+   var i = 0;
 var openCards = [];
 //starts game with new shuffled deck
 $(document).ready(function() {
@@ -22,58 +23,83 @@ $(document).ready(function() {
       });
       deck = $('.deck').children('*');
       displayCard(deck);
-      /*var deck;
-      $('.restart').on('click',reset(deck));
-      //reset(deck);*/
+      restartButton = $('div.restart').children();
+      restartButton.click(function(){
+        restartButton.unbind('click');
+        resetDeck();
+        getDeck();
+      });
     };
+    //remove all open classes and reset openCards
+    function resetDeck(){
+      $('.card').each(function(){
+        $(this).removeClass('show open');
+        $(this).removeClass('match');
+        openCards = [];
 
-
-    //add event listern to each card - if clicked reveal card
+      });
+    };
+    //add event listern to each card - on click add class show open
+    //if already clicked return
     //then add card to temp array
     function displayCard(deck){
       deck.each(function(){
-        $(this).on('click', function(){
-          $(this).hasClass('show open') ? void(0):$(this).addClass("show open");
-          checkCard($(this));
-        
+        $(this).click(function(){
+          if   (($(this).hasClass("show open")) || ($(this).hasClass("match"))){
+            return;
+          }
+          else{
+            //$(this).effect("shake");
+            $(this).addClass("show open");
+            checkCard($(this));
+          }
         });
-
-
-      //a = $('li.card').eq(0);
-      //console.log($(this));
       });
     };
 
-    //check if clicked card is a match
+    //function checks if clicked card is a match
+    //first check whether there is a card open ie. list is not even
+    //if even - return
+    //if odd - check if it's match - if match call keepOpen
+    //if no match call resestCards
     function checkCard(card){
       var userGuess, listIsEven;
       userGuess = getSymbol(card);
       listIsEven = isEven(openCards.length);
-      console.log(openCards);
-      if (listIsEven) { //add guess to openCards
+      if (listIsEven) {
         openCards.push(userGuess);
-        console.log(openCards);
         return;
       }
       else{
         if (isMatch(userGuess)){
-          keepOpen(card);
-          openCards.push(userGuess);
-        } //change class to match push userGuess to list
+          keepOpen(card, userGuess);
+        }
         else {
-          card.removeClass('show open');
-          openCards.pop();
-
-        }//change class to card pop last guess
+          resetCards();
+        }
       }
+    };
 
-
-      function keepOpen(card){
-        card.attr('class', 'card match');
-        $('.deck').find('card show open');
-        card.attr('card show open', 'card match')
+      //takes no params - fin
+      function resetCards(){
+        lastGuess = $('.deck').find('.show');
+        setTimeout(function(){
+          lastGuess.removeClass('show open');
+        },300);
+        openCards.pop();
       };
 
+      function keepOpen(card){
+        userGuess = getSymbol;
+        card.removeClass('show open');
+        card.addClass('match');
+        lastGuess = $('.deck').find('.show');
+        lastGuess.removeClass('show open');
+        lastGuess.addClass('match');
+        openCards.push(userGuess);
+      };
+      //compares last clicked card with present clicked
+      //if same return true else fase
       function isMatch(userGuess){
         //get last element from openCards
         lastGuess = openCards[openCards.length-1];
@@ -86,45 +112,9 @@ $(document).ready(function() {
         return symbol;
       };
 
-
-
-
-
-
-
-    //  openCards.push(a);
-      //console.log(openCards[openCards.length]);
-      if (openCards.length > 1) {
-            //openCards.push(a);
-            //console.log(openCards);
-            openCards.forEach(function(match){
-              if (a === match){
-                console.log(match);
-                console.log(openCards)
-                //add attr 'keep open'
-
-              };
-              //console.log(openCards);
-            });
-          };
-
-    };
-
-
 }); //jquery close bracket
 
 
-
-//revert all cards to original state - takes in an array, changes all className to 'card'
-function reset(array){
-  //var i;
-  for (var i = 0; i < array.length; i++){
-    if (array[i].className === "card match" || array[i].className === "card open show"){
-      array[i].className = "card";
-    }
-  }
-  return array;
-}
 // Shuffle function from http://stackoverflow.com/a/2450976
 function shuffle(array) {
     var currentIndex = array.length, temporaryValue, randomIndex;
