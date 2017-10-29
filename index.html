@@ -10,6 +10,7 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     <script src="http://code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
     <script src="https://cdn.rawgit.com/nnattawat/flip/master/dist/jquery.flip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/timer.jquery/0.7.0/timer.jquery.js"></script>
 
 </head>
 <body>
@@ -28,9 +29,13 @@
 
         	<span class="moves">0</span> Moves
 
-            <div class="restart">
+          <div class="restart">
         		<i class="fa fa-repeat"></i>
         	</div>
+
+          <span id = "timers">Timer: </span>
+          <span class="timer" id="timer">00:00:00</span>
+
         </section>
 
         <ul class="deck">
