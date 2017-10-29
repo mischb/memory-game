@@ -13,7 +13,7 @@
 //starts game with new shuffled deck
 $(document).ready(function() {
     var openCards, moves, totalCards, winner;
-    winnerCalled = 0;
+    winnerCalled = false;
     openCards = [];
     getDeck();
     totalCards = 16;
@@ -21,8 +21,7 @@ $(document).ready(function() {
     * - calls various functions:
     + - shuffle()
     + - displayCard()
-    + -
-    nter()
+    + - moveCounter()
     * - sets restartButton
     */
     function getDeck(){
@@ -37,6 +36,7 @@ $(document).ready(function() {
       moveCounter();
       displayCard(deck);
       restart();
+
       }
 
     /** remove all open classes and reset openCards
@@ -44,6 +44,7 @@ $(document).ready(function() {
     / - remove winner message
     */
     function restart(){
+        console.log(callTimer('win'));
         restartButton = $('div.restart').children();
         restartButton.unbind().click(function(){
             $('.card').each(function(){
@@ -51,21 +52,55 @@ $(document).ready(function() {
                 $(this).removeClass('match');
                 openCards = [];
                 getDeck();
+                callTimer('reset');
               });
-          if (winnerCalled > 0){
+          if (winnerCalled !== false){
             $('.deck').show("explode");
-            winnerCalled = 0;
+            $("div").remove("#winner");
+            winnerCalled = false;
           }
         })
       }
+    /** @params is string
+    * - accepts as state: reset, start, win
+    * - calls timer function FIX THIS
+    */
+    function callTimer(state){
+      if (state === "start"){
+        console.log(state);
+        $("#timer").timer({
+          format: '%h:%m:%s'
+        },'start');
+      }
 
+      if (state === "reset"){
+        $("#timer").timer({
+          //format: '%H:%M:%S',
+        }, 'reset');
+        $("#timer").timer({
+          format: '%H:%M:%S',
+        }, 'remove');
+      //  $("#timer").timer('remove');
+      //  $("#timer").timer('remove');
+      }
+
+      if (state === "win"){
+        $("#timer").timer('remove');
+        return $("#timer").timer('seconds');
+      }
+    }
     /** removes all cards from screen with 'puff' effect
     * - prints winning message on screen
     */
     function winner(){
-      $('.deck').hide('explode');
-      $('body').append("<div id = 'winner'>YOU WIN!! Your score was $('.moves')</div>");
-      winnerCalled++;
+      //$('.deck').hide('explode');
+      var finishTime = callTimer('win');
+      var message = "you finished!\nYour score is: " + moves + "\nYou finished in " + finishTime;
+      alert(message);
+      //alert(finishTime);
+      //$('body').append("<div><script>document.write(moves)</script></div>");
+      //winnerCalled = true;
+
     };
 
     /** add event listern to each card - on click add class show open
@@ -76,12 +111,13 @@ $(document).ready(function() {
     function displayCard(deck){
       deck.each(function(){
         $(this).click(function(){
+          callTimer('start');
           if (($(this).hasClass("show open")) || ($(this).hasClass("match"))){
             return;
           }
           else{
-            //$('.flip').flip();
             $(this).addClass("show open");
+            //console.log("shcek");
             checkCard($(this));
             (openCards.length === totalCards) ? winner():null;
           }
@@ -142,13 +178,13 @@ $(document).ready(function() {
     function resetCards(className){
       var lastGuess = $('.deck').find(className);
       openCards.pop();
+      lastGuess.addClass('noMatch', 800);
+      lastGuess.effect("shake",{distance:15, times:3},1000);
       setTimeout(function(){
-        lastGuess.effect("shake");
-      }, 700);
-      setTimeout(function(){
-        lastGuess.removeClass('show open');
-      }, 800);
-    };
+        lastGuess.removeClass('noMatch');
+        lastGuess.removeClass('show open' );
+      }, 2000);
+    }
 
       /** updates move counter on screen after two cards are clicked
       */
@@ -158,6 +194,7 @@ $(document).ready(function() {
       moves ++;
 
     };
+
     function starRating(){
       twoStars = 15;
       oneStar = 20;
@@ -166,6 +203,7 @@ $(document).ready(function() {
       moves === oneStar ? $("#star2").attr('class','fa fa-star-o'):null;
       moves === zeroStars ? $("#star3").attr('class','fa fa-star-o'):null;
     }
+
     /** accepts card param - returns only the icon/symbol
     */
     function getSymbol(card){
