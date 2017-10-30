@@ -44,7 +44,7 @@ $(document).ready(function() {
     / - remove winner message
     */
     function restart(){
-        console.log(callTimer('win'));
+      //  console.log(callTimer('win'));
         restartButton = $('div.restart').children();
         restartButton.unbind().click(function(){
             $('.card').each(function(){
@@ -67,7 +67,6 @@ $(document).ready(function() {
     */
     function callTimer(state){
       if (state === "start"){
-        console.log(state);
         $("#timer").timer({
           format: '%h:%m:%s'
         },'start');
@@ -141,10 +140,37 @@ $(document).ready(function() {
       }
       else{
         moveCounter();
-        isMatch(card);
+        var secondCard = openCards[openCards.length-1];
+        isMatch(card, secondCard);
       }
     };
+    
+    /** called when no match is found
+    * - removes 'show open' class from open card after __milliseconds
+    * - removes last card from openCards
+    */
+    function resetCards(firstCard, secondCard){
+      //var lastGuess = $('.deck').find(className);
+      openCards.pop();
+      //var num = lastGuess.length-1;
+      //console.log(lastGuess[num-1].hasClass("match"));
+      //if (lastGuess.hasClass('noMatch') === false){
+        firstCard.addClass('noMatch', 800);
+        secondCard.addClass('noMatch', 800);
+        firstCard.effect("shake",{distance:15, times:3},1000);
+        secondCard.effect("shake",{distance:15, times:3},1000);
+      //}
+      setTimeout(function(){
+    //    console.log(lastGuess);
+        firstCard.removeClass('noMatch');
+        firstCard.removeClass('show open' );
+        secondCard.removeClass('noMatch');
+        secondCard.removeClass('show open');
+      }, 2000);
+    }
 
+    
+    
     /** compares last clicked card with present clicked
     * - get last element from openCards
     * - if same return true
@@ -158,7 +184,8 @@ $(document).ready(function() {
           return;
         }
       }
-      resetCards('.show.open');
+      console.log(openCards[openCards.length-1]);
+      resetCards(openCards[openCards.length-1],card);
     }
 
     /** params are two matching cards
@@ -171,20 +198,6 @@ $(document).ready(function() {
       openCards.push(matchCard);
     }
 
-    /** called when no match is found
-    * - removes 'show open' class from open card after __milliseconds
-    * - removes last card from openCards
-    */
-    function resetCards(className){
-      var lastGuess = $('.deck').find(className);
-      openCards.pop();
-      lastGuess.addClass('noMatch', 800);
-      lastGuess.effect("shake",{distance:15, times:3},1000);
-      setTimeout(function(){
-        lastGuess.removeClass('noMatch');
-        lastGuess.removeClass('show open' );
-      }, 2000);
-    }
 
       /** updates move counter on screen after two cards are clicked
       */
@@ -196,9 +209,9 @@ $(document).ready(function() {
     };
 
     function starRating(){
-      twoStars = 15;
-      oneStar = 20;
-      zeroStars = 25;
+      const twoStars = 15;
+      const oneStar = 20;
+      const zeroStars = 25;
       moves === twoStars ? $("#star1").attr('class','fa fa-star-o'):null;
       moves === oneStar ? $("#star2").attr('class','fa fa-star-o'):null;
       moves === zeroStars ? $("#star3").attr('class','fa fa-star-o'):null;
