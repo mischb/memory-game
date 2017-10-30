@@ -149,23 +149,14 @@ $(document).ready(function() {
     * - removes 'show open' class from open card after __milliseconds
     * - removes last card from openCards
     */
+  //  var num = 0
     function resetCards(firstCard, secondCard){
-      //var lastGuess = $('.deck').find(className);
       openCards.pop();
-      //var num = lastGuess.length-1;
-      //console.log(lastGuess[num-1].hasClass("match"));
-      //if (lastGuess.hasClass('noMatch') === false){
-        firstCard.addClass('noMatch', 800);
-        secondCard.addClass('noMatch', 800);
-        firstCard.effect("shake",{distance:15, times:3},1000);
-        secondCard.effect("shake",{distance:15, times:3},1000);
-      //}
+      firstCard.addClass('noMatch', 800).effect("shake",{distance:15, times:3},1000);
+      secondCard.addClass('noMatch', 800).effect("shake",{distance:15, times:3},1000);
       setTimeout(function(){
-    //    console.log(lastGuess);
-        firstCard.removeClass('noMatch');
-        firstCard.removeClass('show open' );
-        secondCard.removeClass('noMatch');
-        secondCard.removeClass('show open');
+        firstCard.removeClass('noMatch').removeClass('show open' );
+        secondCard.removeClass('noMatch').removeClass('show open');
       }, 2000);
     }
 
