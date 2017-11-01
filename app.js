@@ -12,10 +12,11 @@
 
 //starts game with new shuffled deck
 $(document).ready(function() {
-    var openCards, moves, totalCards, winner;
+    var openCards, moves, totalCards, winner, winnerCalled,cardTypes;
+    cardTypes = ["diamond","paper-plane-o","anchor","bolt", "cube","anchor", "leaf", "bicycle","diamond","bomb","leaf","bomb","bolt","bicycle", "paper-plane-o","cube"];
     winnerCalled = false;
     openCards = [];
-    getDeck();
+    //getDeck();
     totalCards = 16;
     /**gets new deck by resetting all parent classes in card list to 'card'
     * - calls various functions:
@@ -24,21 +25,44 @@ $(document).ready(function() {
     + - moveCounter()
     * - sets restartButton
     */
+//$('.deck').hide();
+  /*  start();
+    function start(){
+      $('.deck').hide();
+      //validateForm();
+      $('#button').submit(function( event ){
+         //console.log(validateForm());
+        getDeck();
+        var val;
+        val = $("playerName").val();
+        $("form").hide();
+        $('.score-panel').prepend('<div id="player">Player: '+val+'</div>');
+      })
+    }*/
+    getDeck();
     function getDeck(){
-      var cardTypes, shuffledCards, deck;
-      cardTypes = ["diamond","paper-plane-o","anchor","bolt", "cube","anchor", "leaf", "bicycle","diamond","bomb","leaf","bomb","bolt","bicycle", "paper-plane-o","cube"];
+      var shuffledCards, deck;
+      $('.deck').show('explode',1000);
+
       shuffledCards = shuffle(cardTypes);
       $('.card').each(function(index){
         $(this).children().attr("class", "fa fa-" + shuffledCards[index]);
       })
-      deck = $('.deck').children('*');
+      deck = $('.deck').children();
       moves = 0;
       moveCounter();
       displayCard(deck);
       restart();
-
       }
 
+      function validateForm() {
+      var x = document.forms["player"]["playerName"].value;
+      console.log(x);
+      if (x == "") {
+          alert(x);
+          return false;
+      }
+      }
     /** remove all open classes and reset openCards
     / - reverse explode effect
     / - remove winner message
@@ -68,37 +92,31 @@ $(document).ready(function() {
     function callTimer(state){
       if (state === "start"){
         $("#timer").timer({
-          format: '%h:%m:%s'
+          format: '%H:%M:%S'
         },'start');
       }
 
       if (state === "reset"){
+        $("#timer").timer('remove');
         $("#timer").timer({
-          //format: '%H:%M:%S',
-        }, 'reset');
-        $("#timer").timer({
-          format: '%H:%M:%S',
-        }, 'remove');
-      //  $("#timer").timer('remove');
-      //  $("#timer").timer('remove');
-      }
-
+          format: '%H:%M:%S'
+          },'start');
+        $("#timer").timer('remove');
+        }
       if (state === "win"){
         $("#timer").timer('remove');
-        return $("#timer").timer('seconds');
+        //return $("#timer").data('seconds');
+
       }
     }
     /** removes all cards from screen with 'puff' effect
     * - prints winning message on screen
     */
     function winner(){
-      //$('.deck').hide('explode');
-      var finishTime = callTimer('win');
-      var message = "you finished!\nYour score is: " + moves + "\nYou finished in " + finishTime;
+      $('.deck').hide('explode');
+      var finishTime = $("#timer").data('seconds');
+      var message = "you finished!\nYour score is: " + moves + "\nYou finished in " + finishTime + " second";
       alert(message);
-      //alert(finishTime);
-      //$('body').append("<div><script>document.write(moves)</script></div>");
-      //winnerCalled = true;
 
     };
 
@@ -116,12 +134,10 @@ $(document).ready(function() {
           }
           else{
             $(this).addClass("show open");
-            //console.log("shcek");
             checkCard($(this));
-            (openCards.length === totalCards) ? winner():null;
           }
-        });
-      });
+        })
+      })
     };
 
     /** function checks if clicked card is a match
@@ -132,36 +148,16 @@ $(document).ready(function() {
     */
     function checkCard(card){
       var userGuess, listIsEven;
-      //userGuess = getSymbol(card);
       listIsEven = isEven(openCards.length);
       if (listIsEven) {
         openCards.push(card);
         return;
       }
       else{
-        moveCounter();
-        var secondCard = openCards[openCards.length-1];
-        isMatch(card, secondCard);
+        isMatch(card);
       }
     };
-    
-    /** called when no match is found
-    * - removes 'show open' class from open card after __milliseconds
-    * - removes last card from openCards
-    */
-  //  var num = 0
-    function resetCards(firstCard, secondCard){
-      openCards.pop();
-      firstCard.addClass('noMatch', 800).effect("shake",{distance:15, times:3},1000);
-      secondCard.addClass('noMatch', 800).effect("shake",{distance:15, times:3},1000);
-      setTimeout(function(){
-        firstCard.removeClass('noMatch').removeClass('show open' );
-        secondCard.removeClass('noMatch').removeClass('show open');
-      }, 2000);
-    }
 
-    
-    
     /** compares last clicked card with present clicked
     * - get last element from openCards
     * - if same return true
@@ -175,18 +171,41 @@ $(document).ready(function() {
           return;
         }
       }
-      console.log(openCards[openCards.length-1]);
-      resetCards(openCards[openCards.length-1],card);
+      var secondCard = openCards[openCards.length-1];
+      resetCards(card, secondCard);
     }
+
+    /** called when no match is found
+    * - removes 'show open' class from open card after __milliseconds
+    * - removes last card from openCards
+    */
+  //  var num = 0
+    function resetCards(firstCard, secondCard){
+      moveCounter();
+      openCards.pop();
+      firstCard.addClass('noMatch', 800).effect("shake",{distance:15, times:3},1000);
+      secondCard.addClass('noMatch', 800).effect("shake",{distance:15, times:3},1000);
+      setTimeout(function(){
+        firstCard.removeClass('noMatch').removeClass('show open' );
+        secondCard.removeClass('noMatch').removeClass('show open');
+      }, 2000);
+    }
+
+
 
     /** params are two matching cards
     * - adds 'match' class to both
     * - adds last card to openCards list
     */
     function keepOpen(matchCard, firstCard){
-      matchCard.switchClass('show open', 'match');
-      firstCard.switchClass('show open', 'match');
+      matchCard.switchClass('show open', 'toMatch',500);
+      matchCard.switchClass('toMatch', 'match', 500);
+      firstCard.switchClass('show open', 'toMatch',500);
+      firstCard.switchClass('toMatch', 'match', 500);
       openCards.push(matchCard);
+      console.log(openCards);
+      console.log(matchCard, firstCard);
+      moveCounter();
     }
 
 
@@ -195,8 +214,9 @@ $(document).ready(function() {
     function moveCounter(){
       $('span.moves').text(moves);
       starRating();
+      (openCards.length === totalCards) ? winner():null;
       moves ++;
-
+      //console.log(openCards.length);
     };
 
     function starRating(){
