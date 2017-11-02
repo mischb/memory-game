@@ -18,6 +18,29 @@ $(document).ready(function() {
     openCards = [];
     //getDeck();
     totalCards = 16;
+
+    start();
+    function start(){
+      $("form").show();
+      $('.deck').hide();
+      $('.score-panel').hide();
+      //$('.card').hide();
+      $('.error').hide();
+      $('#button').click(function( e ){ //https://code.tutsplus.com/tutorials/submit-a-form-without-page-refresh-using-jquery--net-59
+        e.preventDefault();
+        var val = $("input#playerName").val();
+        if (val == "") {
+          //$("label#name_error").show();
+          $("#playerName").attr("placeholder", "REQUIRED FIELD"); //https://stackoverflow.com/questions/9232810/change-placeholder-text-using-jquery
+          return false;
+        }
+        var val;
+        playerName = $("#playerName").val();
+        $("form").hide();
+        $('.score-panel').prepend('<h2 id="player"> '+playerName+'</h2>');
+        getDeck();
+      })
+    }
     /**gets new deck by resetting all parent classes in card list to 'card'
     * - calls various functions:
     + - shuffle()
@@ -25,27 +48,16 @@ $(document).ready(function() {
     + - moveCounter()
     * - sets restartButton
     */
-//$('.deck').hide();
-  /*  start();
-    function start(){
-      $('.deck').hide();
-      //validateForm();
-      $('#button').submit(function( event ){
-         //console.log(validateForm());
-        getDeck();
-        var val;
-        val = $("playerName").val();
-        $("form").hide();
-        $('.score-panel').prepend('<div id="player">Player: '+val+'</div>');
-      })
-    }*/
-    getDeck();
+
     function getDeck(){
       var shuffledCards, deck;
-      $('.deck').show('explode',1000);
+      $('.deck').show("explode", 1000);
+      $('.score-panel').show();
+      //$('.deck').children('*').show("explode" );
 
       shuffledCards = shuffle(cardTypes);
       $('.card').each(function(index){
+        $(this).show("explode" );
         $(this).children().attr("class", "fa fa-" + shuffledCards[index]);
       })
       deck = $('.deck').children();
@@ -80,8 +92,9 @@ $(document).ready(function() {
               });
           if (winnerCalled !== false){
             $('.deck').show("explode");
-            $("div").remove("#winner");
+            //$("div").remove("#winner");
             winnerCalled = false;
+            start();
           }
         })
       }
