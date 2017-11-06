@@ -1,23 +1,37 @@
-/*
- * Create a list that holds all of your cards
- */
 
-
-/*
- * Display the cards on the page
- *   - shuffle the list of cards using the provided "shuffle" method below
- *   - loop through each card and create its HTML
- *   - add each card's HTML to the page
- */
-
-//starts game with new shuffled deck
 $(document).ready(function() {
-    var openCards, moves, totalCards, winner;
+    var openCards, moves, totalCards, winner, winnerCalled,cardTypes;
+    cardTypes = ["diamond","paper-plane-o","anchor","bolt", "cube","anchor", "leaf", "bicycle","diamond","bomb","leaf","bomb","bolt","bicycle", "paper-plane-o","cube"];
     winnerCalled = false;
     openCards = [];
-    getDeck();
     totalCards = 16;
-    /**gets new deck by resetting all parent classes in card list to 'card'
+
+   /*
+    * - retrieves/validates playerName and calls getDeck()
+    */
+    start();
+    function start(){
+      document.getElementById("inputName").reset();//code from https://www.w3schools.com/jsref/met_form_reset.asp
+      $("form").show();
+      $(".deck").hide();
+      $(".score-panel").hide();
+      $("#button").click(function(e){ //form validation  html and javascript code from https://code.tutsplus.com/tutorials/submit-a-form-without-page-refresh-using-jquery--net-59
+        e.preventDefault();
+        var val = $("input#playerName").val();
+        if (val == "") {
+          $("#playerName").attr("placeholder", "REQUIRED FIELD"); //https://stackoverflow.com/questions/9232810/change-placeholder-text-using-jquery
+          return false;
+        }
+        var val;
+        playerName = $("#playerName").val();
+        $("form").hide();
+        $(".score-panel").prepend("<h2 id="player"> "+playerName+"</h2>");
+        getDeck();
+      })
+    }
+
+    /**
+    * - gets new deck by resetting all parent classes in card list to "card"
     * - calls various functions:
     + - shuffle()
     + - displayCard()
@@ -25,143 +39,138 @@ $(document).ready(function() {
     * - sets restartButton
     */
     function getDeck(){
-      var cardTypes, shuffledCards, deck;
-      cardTypes = ["diamond","paper-plane-o","anchor","bolt", "cube","anchor", "leaf", "bicycle","diamond","bomb","leaf","bomb","bolt","bicycle", "paper-plane-o","cube"];
+      var shuffledCards, deck;
+      $(".deck").show("explode", 1000);
+      $(".score-panel").show();
+
       shuffledCards = shuffle(cardTypes);
-      $('.card').each(function(index){
+      $(".card").each(function(index){
+        $(this).show("explode" );
         $(this).children().attr("class", "fa fa-" + shuffledCards[index]);
       })
-      deck = $('.deck').children('*');
+      deck = $(".deck").children();
       moves = 0;
       moveCounter();
       displayCard(deck);
       restart();
-
       }
 
-    /** remove all open classes and reset openCards
-    / - reverse explode effect
-    / - remove winner message
+      function validateForm() {
+        var userInput = document.forms["player"]["playerName"].value;
+        console.log(x);
+        if (userInput == "") {
+            alert(userInput);
+            return false;
+      }
+      }
+    /** remove all open/match/flip classes and reset openCards
+    / - reset star rating
+    / -
     */
     function restart(){
-      //  console.log(callTimer('win'));
-        restartButton = $('div.restart').children();
+        restartButton = $("div.restart").children();
+        console.log("restart button: ", restartButton);
+        console.log("restart button12: ", $("div.restart"));
         restartButton.unbind().click(function(){
-            $('.card').each(function(){
-                $(this).removeClass('show open');
-                $(this).removeClass('match');
-                openCards = [];
-                getDeck();
-                callTimer('reset');
-              });
+          $(".card").each(function(){
+              $(this).removeClass("show open");
+              $(this).removeClass("match");
+              $(this).removeClass("flip");
+              openCards = [];
+              getDeck();
+              callTimer("reset");
+              $("#star1").attr("class","fa fa-star");
+              $("#star2").attr("class","fa fa-star");
+              $("#star3").attr("class","fa fa-star");
+            });
           if (winnerCalled !== false){
-            $('.deck').show("explode");
-            $("div").remove("#winner");
+            $(".deck").hide("explode",1000);
             winnerCalled = false;
+            setTimeout(function(){
+              start();
+            },1000)
           }
         })
       }
-    /** @params is string
-    * - accepts as state: reset, start, win
-    * - calls timer function FIX THIS
+    /**
+    * - paramaters is state: reset, start, win
+    * - calls timer function depending on state
     */
     function callTimer(state){
       if (state === "start"){
         $("#timer").timer({
-          format: '%h:%m:%s'
-        },'start');
+          format: "%H:%M:%S"
+        },"start");
       }
 
       if (state === "reset"){
+        $("#timer").timer("remove");
         $("#timer").timer({
-          //format: '%H:%M:%S',
-        }, 'reset');
-        $("#timer").timer({
-          format: '%H:%M:%S',
-        }, 'remove');
-      //  $("#timer").timer('remove');
-      //  $("#timer").timer('remove');
-      }
-
+          format: "%H:%M:%S"
+          },"start");
+        $("#timer").timer("remove");
+        }
       if (state === "win"){
-        $("#timer").timer('remove');
-        return $("#timer").timer('seconds');
+        $("#timer").timer("remove");
+
       }
     }
-    /** removes all cards from screen with 'puff' effect
+    /** removes all cards from screen with "puff" effect
     * - prints winning message on screen
     */
     function winner(){
-      //$('.deck').hide('explode');
-      var finishTime = callTimer('win');
-      var message = "you finished!\nYour score is: " + moves + "\nYou finished in " + finishTime;
-      alert(message);
-      //alert(finishTime);
-      //$('body').append("<div><script>document.write(moves)</script></div>");
-      //winnerCalled = true;
-
+      var finishTime = $("#timer").data("seconds");
+      var winningMessage = "you finished in: " + moves + "\nAnd in " + finishTime + " seconds";
+      winnerCalled = true;
+      callTimer("win");
+      setTimeout(function(){
+        alert(winningMessage);
+      },600)
     };
 
     /** add event listern to each card - on click add class show open
     * - if already clicked return
-    * - else reveal card 'show open'
-    * - call 'checkCard' with clicked card
+    * - else reveal card "show open"
+    * - call "checkCard" with clicked card
     */
     function displayCard(deck){
       deck.each(function(){
         $(this).click(function(){
-          callTimer('start');
-          if (($(this).hasClass("show open")) || ($(this).hasClass("match"))){
+          callTimer("start");
+          if ($(this).hasClass("flip")){
             return;
           }
           else{
-            $(this).addClass("show open");
-            //console.log("shcek");
-            checkCard($(this));
-            (openCards.length === totalCards) ? winner():null;
+            var flipCard = $(this);
+            flipCard.addClass("open");
+            flipCard.addClass("flip");
+            setTimeout(function(){
+               flipCard.addClass("show");
+             }, 150);
+            checkCard(flipCard);
           }
-        });
-      });
+        })
+      })
     };
 
     /** function checks if clicked card is a match
     * - first check whether there is a card open ie. list is not even
     * - if even - return
-    * - if odd - check if it's match - if match call keepOpen
+    * - if odd - check if it"s match - if match call keepOpen
     * - if no match call resestCards
     */
     function checkCard(card){
       var userGuess, listIsEven;
-      //userGuess = getSymbol(card);
       listIsEven = isEven(openCards.length);
       if (listIsEven) {
         openCards.push(card);
         return;
       }
       else{
-        moveCounter();
-        var secondCard = openCards[openCards.length-1];
-        isMatch(card, secondCard);
+        isMatch(card);
       }
     };
-    
-    /** called when no match is found
-    * - removes 'show open' class from open card after __milliseconds
-    * - removes last card from openCards
-    */
-  //  var num = 0
-    function resetCards(firstCard, secondCard){
-      openCards.pop();
-      firstCard.addClass('noMatch', 800).effect("shake",{distance:15, times:3},1000);
-      secondCard.addClass('noMatch', 800).effect("shake",{distance:15, times:3},1000);
-      setTimeout(function(){
-        firstCard.removeClass('noMatch').removeClass('show open' );
-        secondCard.removeClass('noMatch').removeClass('show open');
-      }, 2000);
-    }
 
-    
-    
     /** compares last clicked card with present clicked
     * - get last element from openCards
     * - if same return true
@@ -175,43 +184,71 @@ $(document).ready(function() {
           return;
         }
       }
-      console.log(openCards[openCards.length-1]);
-      resetCards(openCards[openCards.length-1],card);
+      var secondCard = openCards[openCards.length-1];
+      resetCards(card, secondCard);
     }
 
+    /** called when no match is found
+    * - runs noMatch animation by adding and then removing classes
+    */
+    function resetCards(firstCard, secondCard){
+      moveCounter();
+      openCards.pop();
+      firstCard.addClass("noMatch", 800).effect("shake",{distance:15, times:3},1000);
+      secondCard.addClass("noMatch", 800).effect("shake",{distance:15, times:3},1000);
+      setTimeout(function(){
+        firstCard.removeClass("flip");
+        secondCard.removeClass("flip");
+      }, 2000);
+      setTimeout(function(){
+        firstCard.removeClass("noMatch").removeClass("show open" );
+        secondCard.removeClass("noMatch").removeClass("show open");
+      }, 2150);
+
+    }
+
+
+
     /** params are two matching cards
-    * - adds 'match' class to both
+    * - adds "match" class to both
     * - adds last card to openCards list
     */
     function keepOpen(matchCard, firstCard){
-      matchCard.switchClass('show open', 'match');
-      firstCard.switchClass('show open', 'match');
+      matchCard.switchClass("open", "match",1000);
+      firstCard.switchClass("open", "match",1000);
       openCards.push(matchCard);
+      moveCounter();
     }
 
 
-      /** updates move counter on screen after two cards are clicked
+      /** updates move counter on screen
       */
     function moveCounter(){
-      $('span.moves').text(moves);
+      var a = $("span.moves").text(moves);
+      console.log(a);
       starRating();
-      moves ++;
-
+      if (openCards.length === totalCards) {
+        winner();
+        return;
+      }
+      else{
+        moves ++;
+      }
     };
 
     function starRating(){
       const twoStars = 15;
       const oneStar = 20;
       const zeroStars = 25;
-      moves === twoStars ? $("#star1").attr('class','fa fa-star-o'):null;
-      moves === oneStar ? $("#star2").attr('class','fa fa-star-o'):null;
-      moves === zeroStars ? $("#star3").attr('class','fa fa-star-o'):null;
+      moves === twoStars ? $("#star1").attr("class","fa fa-star-o"):null;
+      moves === oneStar ? $("#star2").attr("class","fa fa-star-o"):null;
+      moves === zeroStars ? $("#star3").attr("class","fa fa-star-o"):null;
     }
 
     /** accepts card param - returns only the icon/symbol
     */
     function getSymbol(card){
-      symbol = card.children().attr('class');
+      symbol = card.children().attr("class");
       return symbol;
     };
 
@@ -241,14 +278,3 @@ function isEven(num){
     return false;
   }
 };
-
-/*
- * set up the event listener for a card. If a card is clicked:
- *  - display the card's symbol (put this functionality in another function that you call from this one)
- *  - add the card to a *list* of "open" cards (put this functionality in another function that you call from this one)
- *  - if the list already has another card, check to see if the two cards match
- *    + if the cards do match, lock the cards in the open position (put this functionality in another function that you call from this one)
- *    + if the cards do not match, remove the cards from the list and hide the card's symbol (put this functionality in another function that you call from this one)
- *    + increment the move counter and display it on the page (put this functionality in another function that you call from this one)
- *    + if all cards have matched, display a message with the final score (put this functionality in another function that you call from this one)
- */
