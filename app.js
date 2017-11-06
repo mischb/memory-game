@@ -1,8 +1,7 @@
 
 $(document).ready(function() {
-    var openCards, moves, totalCards, winner, winnerCalled,cardTypes;
+    var openCards, moves, totalCards, winner, winnerCalled, cardTypes, stars;
     cardTypes = ["diamond","paper-plane-o","anchor","bolt", "cube","anchor", "leaf", "bicycle","diamond","bomb","leaf","bomb","bolt","bicycle", "paper-plane-o","cube"];
-    winnerCalled = false;
     openCards = [];
     totalCards = 16;
 
@@ -11,6 +10,8 @@ $(document).ready(function() {
     */
     start();
     function start(){
+      winnerCalled = false;
+      stars = 3;
       document.getElementById("inputName").reset();//code from https://www.w3schools.com/jsref/met_form_reset.asp
       $("form").show();
       $(".deck").hide();
@@ -18,14 +19,14 @@ $(document).ready(function() {
       $("#button").click(function(e){ //form validation  html and javascript code from https://code.tutsplus.com/tutorials/submit-a-form-without-page-refresh-using-jquery--net-59
         e.preventDefault();
         var val = $("input#playerName").val();
-        if (val == "") {
+        if (val === "") {
           $("#playerName").attr("placeholder", "REQUIRED FIELD"); //https://stackoverflow.com/questions/9232810/change-placeholder-text-using-jquery
           return false;
         }
-        var val;
         playerName = $("#playerName").val();
         $("form").hide();
-        $(".score-panel").prepend("<h2 id="player"> "+playerName+"</h2>");
+        $("#player").remove();
+        $(".score-panel").prepend("<h2 id='player'> " + playerName + "</h2>");
         getDeck();
       })
     }
@@ -55,44 +56,33 @@ $(document).ready(function() {
       restart();
       }
 
-      function validateForm() {
-        var userInput = document.forms["player"]["playerName"].value;
-        console.log(x);
-        if (userInput == "") {
-            alert(userInput);
-            return false;
-      }
-      }
-    /** remove all open/match/flip classes and reset openCards
-    / - reset star rating
-    / -
+    /**
+    * - remove all open/match/flip classes and reset openCards
+    * - reset star rating
+    * - if game over (winnerCalled) explodes deck calls start()
     */
     function restart(){
         restartButton = $("div.restart").children();
-        console.log("restart button: ", restartButton);
-        console.log("restart button12: ", $("div.restart"));
         restartButton.unbind().click(function(){
           $(".card").each(function(){
-              $(this).removeClass("show open");
-              $(this).removeClass("match");
-              $(this).removeClass("flip");
-              openCards = [];
-              getDeck();
-              callTimer("reset");
-              $("#star1").attr("class","fa fa-star");
-              $("#star2").attr("class","fa fa-star");
-              $("#star3").attr("class","fa fa-star");
-            });
+            $(this).removeClass("show open match flip");
+            $("#star1").attr("class","fa fa-star");
+            $("#star2").attr("class","fa fa-star");
+            $("#star3").attr("class","fa fa-star");
+            openCards = [];
+            getDeck();
+            callTimer("reset");
+          });
           if (winnerCalled !== false){
             $(".deck").hide("explode",1000);
-            winnerCalled = false;
             setTimeout(function(){
               start();
             },1000)
           }
         })
-      }
+    }
     /**
+    * - timer script from: https://cdnjs.cloudflare.com/ajax/libs/timer.jquery/0.7.0/timer.jquery.js
     * - paramaters is state: reset, start, win
     * - calls timer function depending on state
     */
@@ -115,12 +105,21 @@ $(document).ready(function() {
 
       }
     }
-    /** removes all cards from screen with "puff" effect
-    * - prints winning message on screen
+
+    /**
+    * - displays winning alert message
+    * - freezes timer until restart clicked
     */
     function winner(){
       var finishTime = $("#timer").data("seconds");
-      var winningMessage = "you finished in: " + moves + "\nAnd in " + finishTime + " seconds";
+      var finalStars;
+      if (stars === 1){
+        finalStars = "star";
+      }
+      else {
+        finalStars = "stars";
+      }
+      var winningMessage = "Congrats " + playerName + "!!\nYou got: " + stars + " " + finalStars + "\nYou finished in: " + moves + "\nYour time was: " + finishTime + "seconds.";
       winnerCalled = true;
       callTimer("win");
       setTimeout(function(){
@@ -136,7 +135,7 @@ $(document).ready(function() {
     function displayCard(deck){
       deck.each(function(){
         $(this).click(function(){
-          callTimer("start");
+          (winnerCalled === false) ? callTimer("start"): null;
           if ($(this).hasClass("flip")){
             return;
           }
@@ -194,14 +193,14 @@ $(document).ready(function() {
     function resetCards(firstCard, secondCard){
       moveCounter();
       openCards.pop();
-      firstCard.addClass("noMatch", 800).effect("shake",{distance:15, times:3},1000);
-      secondCard.addClass("noMatch", 800).effect("shake",{distance:15, times:3},1000);
+      firstCard.addClass("noMatch", 800).effect("shake", {distance:15, times:3}, 1000);
+      secondCard.addClass("noMatch", 800).effect("shake", {distance:15, times:3}, 1000);
       setTimeout(function(){
         firstCard.removeClass("flip");
         secondCard.removeClass("flip");
       }, 2000);
       setTimeout(function(){
-        firstCard.removeClass("noMatch").removeClass("show open" );
+        firstCard.removeClass("noMatch").removeClass("show open");
         secondCard.removeClass("noMatch").removeClass("show open");
       }, 2150);
 
@@ -224,8 +223,7 @@ $(document).ready(function() {
       /** updates move counter on screen
       */
     function moveCounter(){
-      var a = $("span.moves").text(moves);
-      console.log(a);
+      $("span.moves").text(moves);
       starRating();
       if (openCards.length === totalCards) {
         winner();
@@ -235,14 +233,26 @@ $(document).ready(function() {
         moves ++;
       }
     };
-
+   /*
+    * - updates on screen star rating
+    * - when moves = x star is hollowed out on screen
+    */
     function starRating(){
       const twoStars = 15;
       const oneStar = 20;
       const zeroStars = 25;
-      moves === twoStars ? $("#star1").attr("class","fa fa-star-o"):null;
-      moves === oneStar ? $("#star2").attr("class","fa fa-star-o"):null;
-      moves === zeroStars ? $("#star3").attr("class","fa fa-star-o"):null;
+      if (moves === twoStars){
+        $("#star1").attr("class","fa fa-star-o");
+        stars = 2;
+      }
+      if (moves === oneStar){
+        $("#star2").attr("class","fa fa-star-o");
+        stars = 1;
+      }
+      if (moves === zeroStars){
+        $("#star3").attr("class","fa fa-star-o");
+        stars = 0;
+      }
     }
 
     /** accepts card param - returns only the icon/symbol
