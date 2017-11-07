@@ -1,9 +1,11 @@
 
 $(document).ready(function() {
-    var openCards, moves, totalCards, winner, winnerCalled, cardTypes, stars;
+    var openCards, moves, totalCards, winner, winnerCalled, cardTypes, stars, cardsFlipped;
     cardTypes = ["diamond","paper-plane-o","anchor","bolt", "cube","anchor", "leaf", "bicycle","diamond","bomb","leaf","bomb","bolt","bicycle", "paper-plane-o","cube"];
     openCards = [];
     totalCards = 16;
+    const twoCardsFlipped = 2;
+    cardsFlipped = 0;
 
    /*
     * - retrieves/validates playerName and calls getDeck()
@@ -27,7 +29,7 @@ $(document).ready(function() {
         $("form").hide();
         $("#player").remove();
         $(".score-panel").prepend("<h2 id='player'> " + playerName + "</h2>");
-        getDeck();
+        getDeck();)
       })
     }
 
@@ -135,8 +137,12 @@ $(document).ready(function() {
     function displayCard(deck){
       deck.each(function(){
         $(this).click(function(){
+          console.log(cardsFlipped);
           (winnerCalled === false) ? callTimer("start"): null;
           if ($(this).hasClass("flip")){
+            return;
+          }
+          else if (cardsFlipped === twoCardsFlipped) {
             return;
           }
           else{
@@ -147,6 +153,7 @@ $(document).ready(function() {
                flipCard.addClass("show");
              }, 150);
             checkCard(flipCard);
+            cardsFlipped++;
           }
         })
       })
@@ -179,7 +186,7 @@ $(document).ready(function() {
       var userGuess = getSymbol(card);
       for(i=0; i < openCards.length; i++){
         if (getSymbol(openCards[i]) === userGuess){
-          keepOpen(card, openCards[i]); // fix this
+          keepOpen(card, openCards[i]);
           return;
         }
       }
@@ -202,6 +209,7 @@ $(document).ready(function() {
       setTimeout(function(){
         firstCard.removeClass("noMatch").removeClass("show open");
         secondCard.removeClass("noMatch").removeClass("show open");
+        cardsFlipped = 0;
       }, 2150);
 
     }
@@ -213,10 +221,14 @@ $(document).ready(function() {
     * - adds last card to openCards list
     */
     function keepOpen(matchCard, firstCard){
-      matchCard.switchClass("open", "match",1000);
-      firstCard.switchClass("open", "match",1000);
+      matchCard.switchClass("open", "match",1500);
+      firstCard.switchClass("open", "match",1500);
       openCards.push(matchCard);
+      setTimeout(function(){
+          cardsFlipped = 0;
+      },1500)
       moveCounter();
+
     }
 
 

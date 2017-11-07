@@ -39,8 +39,9 @@ h1 {
  */
 
 .deck {
-    width: 660px;
-    min-height: 680px;
+    max-width: 100%;
+    max-height: auto;
+
     background: linear-gradient(160deg, #02ccba 0%, #aa7ecd 100%);
     padding: 32px;
     border-radius: 10px;
@@ -48,7 +49,7 @@ h1 {
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
-    align-items: center;
+    align-items: right;
     margin: 0 0 3em;
 }
 
@@ -92,6 +93,9 @@ h1 {
     background: #02ccba;
 }
 
+.deck .card.checking {
+  cursor: progress;
+}
 /*
  * Styles for the Score Panel
  */
