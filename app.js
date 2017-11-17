@@ -16,20 +16,21 @@ $(document).ready(function() {
       stars = 3;
       document.getElementById("inputName").reset();//code from https://www.w3schools.com/jsref/met_form_reset.asp
       $("form").show();
+      $(".winner").hide();
       $(".deck").hide();
       $(".score-panel").hide();
       $("#button").click(function(e){ //form validation  html and javascript code from https://code.tutsplus.com/tutorials/submit-a-form-without-page-refresh-using-jquery--net-59
-        e.preventDefault();
-        var val = $("input#playerName").val();
-        if (val === "") {
-          $("#playerName").attr("placeholder", "REQUIRED FIELD"); //https://stackoverflow.com/questions/9232810/change-placeholder-text-using-jquery
-          return false;
-        }
-        playerName = $("#playerName").val();
-        $("form").hide();
-        $("#player").remove();
-        $(".score-panel").prepend("<h2 id='player'> " + playerName + "</h2>");
-        getDeck();)
+          e.preventDefault();
+          var val = $("input#playerName").val();
+          if (val === "") {
+            $("#playerName").attr("placeholder", "REQUIRED FIELD"); //https://stackoverflow.com/questions/9232810/change-placeholder-text-using-jquery
+            return false;
+          }
+          playerName = $("#playerName").val();
+          $("form").hide();
+          $("#player").remove();
+          $(".score-panel").prepend("<h2 id='player'> " + playerName + "</h2>");
+          getDeck();
       })
     }
 
@@ -45,7 +46,6 @@ $(document).ready(function() {
       var shuffledCards, deck;
       $(".deck").show("explode", 1000);
       $(".score-panel").show();
-
       shuffledCards = shuffle(cardTypes);
       $(".card").each(function(index){
         $(this).show("explode" );
@@ -125,7 +125,11 @@ $(document).ready(function() {
       winnerCalled = true;
       callTimer("win");
       setTimeout(function(){
-        alert(winningMessage);
+        $('.deck').hide("explode", "slow");
+        $('.container').hide("explode", "slow");
+      },600)
+      setTimeout(function(){
+        $(".winner").show();
       },600)
     };
 
@@ -250,9 +254,8 @@ $(document).ready(function() {
     * - when moves = x star is hollowed out on screen
     */
     function starRating(){
-      const twoStars = 15;
-      const oneStar = 20;
-      const zeroStars = 25;
+      const twoStars = 10;
+      const oneStar = 15;
       if (moves === twoStars){
         $("#star1").attr("class","fa fa-star-o");
         stars = 2;
@@ -260,10 +263,6 @@ $(document).ready(function() {
       if (moves === oneStar){
         $("#star2").attr("class","fa fa-star-o");
         stars = 1;
-      }
-      if (moves === zeroStars){
-        $("#star3").attr("class","fa fa-star-o");
-        stars = 0;
       }
     }
 
