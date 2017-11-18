@@ -6,7 +6,7 @@ $(document).ready(function() {
     totalCards = 16;
     const twoCardsFlipped = 2;
     cardsFlipped = 0;
-
+    //openCards.length = totalCards;
    /*
     * - retrieves/validates playerName and calls getDeck()
     */
@@ -16,20 +16,21 @@ $(document).ready(function() {
       stars = 3;
       document.getElementById("inputName").reset();//code from https://www.w3schools.com/jsref/met_form_reset.asp
       $("form").show();
+      $(".winner").hide();
       $(".deck").hide();
       $(".score-panel").hide();
       $("#button").click(function(e){ //form validation  html and javascript code from https://code.tutsplus.com/tutorials/submit-a-form-without-page-refresh-using-jquery--net-59
-        e.preventDefault();
-        var val = $("input#playerName").val();
-        if (val === "") {
-          $("#playerName").attr("placeholder", "REQUIRED FIELD"); //https://stackoverflow.com/questions/9232810/change-placeholder-text-using-jquery
-          return false;
-        }
-        playerName = $("#playerName").val();
-        $("form").hide();
-        $("#player").remove();
-        $(".score-panel").prepend("<h2 id='player'> " + playerName + "</h2>");
-        getDeck();)
+          e.preventDefault();
+          var val = $("input#playerName").val();
+          if (val === "") {
+            $("#playerName").attr("placeholder", "REQUIRED FIELD"); //https://stackoverflow.com/questions/9232810/change-placeholder-text-using-jquery
+            return false;
+          }
+          playerName = $("#playerName").val();
+          $("form").hide();
+          $("#player").remove();
+          $(".score-panel").prepend("<h2 id='player'> " + playerName + "</h2>");
+          getDeck();
       })
     }
 
@@ -45,7 +46,6 @@ $(document).ready(function() {
       var shuffledCards, deck;
       $(".deck").show("explode", 1000);
       $(".score-panel").show();
-
       shuffledCards = shuffle(cardTypes);
       $(".card").each(function(index){
         $(this).show("explode" );
@@ -66,23 +66,25 @@ $(document).ready(function() {
     function restart(){
         restartButton = $("div.restart").children();
         restartButton.unbind().click(function(){
-          $(".card").each(function(){
-            $(this).removeClass("show open match flip");
-            $("#star1").attr("class","fa fa-star");
-            $("#star2").attr("class","fa fa-star");
-            $("#star3").attr("class","fa fa-star");
-            openCards = [];
-            getDeck();
-            callTimer("reset");
-          });
-          if (winnerCalled !== false){
-            $(".deck").hide("explode",1000);
-            setTimeout(function(){
-              start();
-            },1000)
+          if (cardsFlipped === twoCardsFlipped){
+              return;
+            }
+          else {
+            reset();
           }
         })
     }
+    function reset(){
+      $(".card").each(function(){
+        $(this).removeClass("show open match flip");
+        $("#star1").attr("class","fa fa-star");
+        $("#star2").attr("class","fa fa-star");
+        openCards = [];
+        getDeck();
+        callTimer("reset");
+      });
+    }
+
     /**
     * - timer script from: https://cdnjs.cloudflare.com/ajax/libs/timer.jquery/0.7.0/timer.jquery.js
     * - paramaters is state: reset, start, win
@@ -114,19 +116,26 @@ $(document).ready(function() {
     */
     function winner(){
       var finishTime = $("#timer").data("seconds");
-      var finalStars;
-      if (stars === 1){
-        finalStars = "star";
-      }
-      else {
-        finalStars = "stars";
-      }
-      var winningMessage = "Congrats " + playerName + "!!\nYou got: " + stars + " " + finalStars + "\nYou finished in: " + moves + "\nYour time was: " + finishTime + "seconds.";
+      var winningMessage = "Congrats " + playerName + "!!<br/>Stars: " + stars + "<br/>Moves: " + moves + "<br/>Time: " + finishTime + " seconds<br/><br/>Would you like to play again?";
       winnerCalled = true;
       callTimer("win");
       setTimeout(function(){
-        alert(winningMessage);
-      },600)
+        $('.deck').hide("explode", "slow");
+        $('.container').hide("explode", "slow");
+      },800)
+      setTimeout(function(){
+        $(".winner").show();
+        $(".winner").prepend("<div id=winMess>" + winningMessage + "</div>");
+      },1000)
+      $("#winnerRestart").unbind().click(function(e){ //form validation  html and javascript code from https://code.tutsplus.com/tutorials/submit-a-form-without-page-refresh-using-jquery--net-59
+          e.preventDefault();
+          $('.deck').show();
+          $('.container').show();
+          $("#winMess").remove();
+          $(".winner").hide();
+          winnerCalled = false;
+          reset();
+        })
     };
 
     /** add event listern to each card - on click add class show open
@@ -137,7 +146,6 @@ $(document).ready(function() {
     function displayCard(deck){
       deck.each(function(){
         $(this).click(function(){
-          console.log(cardsFlipped);
           (winnerCalled === false) ? callTimer("start"): null;
           if ($(this).hasClass("flip")){
             return;
@@ -250,9 +258,8 @@ $(document).ready(function() {
     * - when moves = x star is hollowed out on screen
     */
     function starRating(){
-      const twoStars = 15;
-      const oneStar = 20;
-      const zeroStars = 25;
+      const twoStars = 10;
+      const oneStar = 15;
       if (moves === twoStars){
         $("#star1").attr("class","fa fa-star-o");
         stars = 2;
@@ -260,10 +267,6 @@ $(document).ready(function() {
       if (moves === oneStar){
         $("#star2").attr("class","fa fa-star-o");
         stars = 1;
-      }
-      if (moves === zeroStars){
-        $("#star3").attr("class","fa fa-star-o");
-        stars = 0;
       }
     }
 
